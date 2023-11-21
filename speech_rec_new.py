@@ -4,7 +4,7 @@ import speech_recognition as sr
 def transcribe_speech(recognizer, audio, api, language):
     try:
         if api == 'Google':
-            text = recognizer.recognize_google(audio, language=language)  # Google Speech Recognition
+            text = recognizer.recognize_google(audio, language=language) 
         elif api == 'Bing':
             text = recognizer.recognize_sphinx(audio, language=language)
         elif api == 'Amazon':
