@@ -1,10 +1,12 @@
 import streamlit as st
 import speech_recognition as sr
+import pyaudio
+import wave
 
 def transcribe_speech(recognizer, audio, api, language):
     try:
         if api == 'Google':
-            text = recognizer.recognize_google(audio, language=language) 
+            text = recognizer.recognize_google(audio, language=language)  # Google Speech Recognition
         elif api == 'Bing':
             text = recognizer.recognize_sphinx(audio, language=language)
         elif api == 'Amazon':
@@ -23,30 +25,38 @@ def transcribe_speech(recognizer, audio, api, language):
 def main():
     st.title("Speech Recognition App")
 
-    file_output = st.empty()
-    language = st.selectbox("Select Language", ["en-US", "es-ES", "fr-FR"])
+    language = st.selectbox("Select Language", ["en-US", "es-ES"])
     api = st.selectbox("Select Speech Recognition API", ["Google", "Bing", "Amazon", "Watson"])
+    recording = False
+
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
 
-    with microphone as source:
-        st.checkbox("Pause/Resume Recognition")  # Logic to pause/resume recognition
+    with st.expander("Recognition Controls"):
+        if st.button("Start Recording"):
+            recording = True
+            st.write("Recording...")
 
-        while True:
-            st.write("Listening...")
-            audio = recognizer.listen(source)
+        if st.button("Stop Recording"):
+            recording = False
+            st.write("Recording Stopped.")
 
-            try:
-                text = transcribe_speech(recognizer, audio)
-                file_output.text_area("Transcribed Text", text)
+    if recording:
+        try:
+            with microphone as source:
+                audio = recognizer.listen(source)
+            text = transcribe_speech(recognizer, audio, api, language)
+            st.write("Transcribed Text:")
+            st.write(text)
 
-                if st.button("Save to File"):
-                    with open("transcribed_text.txt", "w") as file:
-                        file.write(text)
-                        st.write("Text saved to transcribed_text.txt")
+            if st.button("Save to File"):
+                with open("transcribed_text.txt", "w") as file:
+                    file.write(text)
+                    st.write("Text saved to transcribed_text.txt")
 
-            except KeyboardInterrupt:
-                break
+        except KeyboardInterrupt:
+            pass
+
 
 if __name__ == "__main__":
     main()
